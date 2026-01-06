@@ -30,7 +30,7 @@
     <div id="screen-intro" class="screen active-screen">
         <div class="glass-panel text-center">
             <h1 class="main-title"><i class="fa-solid fa-chess"></i> Modern Satranç</h1>
-            <p class="subtitle">Strateji ve Zeka Oyunu</p>
+            <p class="subtitle">Strateji e Zeka Oyunu</p>
             <div class="intro-buttons">
                 <!-- Sadece Oyuna Başla butonu kaldı, Ayarlar sağ üste taşındı -->
                 <button id="btn-enter" class="action-btn glow-effect large-btn">Oyuna Başla</button>
@@ -201,45 +201,68 @@
     <!-- EKRAN 3: OYUN EKRANI -->
     <div id="screen-game" class="screen hidden">
         <div class="game-layout">
-            <!-- Sol Panel: Tahta -->
-            <div class="board-container">
-                <div id="board" class="chess-board">
-                    <!-- Kareler JS ile oluşturulacak -->
+
+            <!-- Üst Bar (Mobil için) / Sol Panel (Masaüstü için) -->
+            <div class="captured-panel" id="panel-top">
+                <div class="player-label">
+                    <span class="p-icon"><i class="fa-solid fa-chess-king"
+                            style="color: var(--piece-black);"></i></span>
+                    <span>Siyah</span>
+                </div>
+                <div id="captured-white" class="captured-container">
+                    <!-- Beyazın yediği (Siyah taşlar) buraya -->
+                </div>
+                <div class="timer-display" id="timer-black-display">
+                    --:--
                 </div>
             </div>
 
-            <!-- Sağ Panel: Bilgi ve Kontroller -->
+            <!-- Tahta Alanı -->
+            <div class="board-wrapper">
+                <div class="board-container">
+                    <div id="board" class="chess-board">
+                        <!-- Kareler JS ile -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Alt Bar (Mobil) / Sağ Panel (Masaüstü) -->
+            <div class="captured-panel" id="panel-bottom">
+                <div class="player-label">
+                    <span class="p-icon"><i class="fa-solid fa-chess-king"
+                            style="color: var(--piece-white);"></i></span>
+                    <span>Beyaz</span>
+                </div>
+                <div id="captured-black" class="captured-container">
+                    <!-- Siyahın yediği (Beyaz taşlar) buraya -->
+                </div>
+                <div class="timer-display" id="timer-white-display">
+                    --:--
+                </div>
+            </div>
+
+            <!-- Kontrol Paneli (Sağda sabit) -->
             <div class="side-panel glass-panel">
-                <div class="game-info">
-                    <div class="player-turn active-turn" id="turn-display">
-                        <span id="turn-icon"><i class="fa-solid fa-chess-pawn"></i></span>
-                        <span id="turn-text">Sıra: Beyaz</span>
-                    </div>
-                    <div class="status-msg" id="status">İyi eğlenceler!</div>
-                </div>
-
-                <div class="timers hidden" id="timers-container">
-                    <div class="timer-box" id="timer-white">
-                        <i class="fa-solid fa-hourglass-start"></i>
-                        <span>Beyaz: <span id="time-w">--:--</span></span>
-                    </div>
-                    <div class="timer-box" id="timer-black">
-                        <i class="fa-solid fa-hourglass-start"></i>
-                        <span>Siyah: <span id="time-b">--:--</span></span>
+                <div class="game-header">
+                    <h3 class="logo-mini"><i class="fa-solid fa-chess"></i></h3>
+                    <div class="match-status" id="turn-display">
+                        <span id="turn-icon"></span>
+                        <span id="turn-text">Hazırlanıyor...</span>
                     </div>
                 </div>
 
-                <div class="move-history">
-                    <h3>Hamleler</h3>
-                    <ul id="historyList"></ul>
+                <div class="game-controls-grid">
+                    <button id="undoBtn" class="control-btn" title="Geri Al"><i
+                            class="fa-solid fa-rotate-left"></i></button>
+                    <button id="resetBtn" class="control-btn" title="Yeniden"><i
+                            class="fa-solid fa-arrows-rotate"></i></button>
+                    <button id="homeBtn" class="control-btn danger" title="Çıkış"><i
+                            class="fa-solid fa-right-from-bracket"></i></button>
                 </div>
 
-                <div class="game-controls">
-                    <button id="undoBtn" class="action-btn secondary"><i class="fa-solid fa-rotate-left"></i> Geri
-                        Al</button>
-                    <button id="resetBtn" class="action-btn danger"><i class="fa-solid fa-power-off"></i> Pes Et /
-                        Sıfırla</button>
-                    <button id="homeBtn" class="action-btn primary"><i class="fa-solid fa-house"></i> Ana Menü</button>
+                <div class="move-history-container">
+                    <h4>Hamle Geçmişi</h4>
+                    <ul id="historyList" class="history-list"></ul>
                 </div>
             </div>
         </div>

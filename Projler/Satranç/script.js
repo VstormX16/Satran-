@@ -1,4 +1,4 @@
-﻿window.onerror = function(msg, url, line) { alert('HATA: ' + msg + ' (Satır: ' + line + ')'); };
+﻿window.onerror = function (msg, url, line) { alert('HATA: ' + msg + ' (Satır: ' + line + ')'); };
 // --- SATRANÇ PROJESİ v4.0 (STABLE) ---
 
 // --- 1. GLOBALS & SELECTORS ---
@@ -18,8 +18,8 @@ const UI = {
     turnIcon: document.getElementById('turn-icon'),
     historyList: document.getElementById('historyList'),
     winnerName: document.getElementById('winner-name'),
-    timerWhite: document.getElementById('timer-white'),
-    timerBlack: document.getElementById('timer-black'),
+    timerWhite: document.getElementById('timer-white-display'),
+    timerBlack: document.getElementById('timer-black-display'),
     capturedWhite: document.getElementById('captured-white'),
     capturedBlack: document.getElementById('captured-black'),
     notification: document.getElementById('notification-toast'),
@@ -145,6 +145,7 @@ function startGame() {
     STATE.turn = 'w';
     STATE.selectedSquare = null;
     UI.historyList.innerHTML = '';
+    UI.board.innerHTML = ''; // Clear visual board
 
     // 3. UI Setup
     showScreen('screen-game');
@@ -249,8 +250,16 @@ function onSquareClick(squareId) {
         }
     } else {
         const piece = game.get(squareId);
-        // Reselect own piece
+        // Reselect own piece OR Castling Attempt
         if (piece && piece.color === game.turn()) {
+            // Special Case: Castling by clicking Rook?
+            const selectedPiece = game.get(STATE.selectedSquare);
+            if (selectedPiece && selectedPiece.type === 'k' && piece.type === 'r') {
+                // Try to castle
+                tryMakeMove(STATE.selectedSquare, squareId);
+                return;
+            }
+
             clearHighlights();
             STATE.selectedSquare = squareId;
             highlightSquare(squareId);
@@ -263,7 +272,27 @@ function onSquareClick(squareId) {
 }
 
 function tryMakeMove(from, to) {
-    const move = game.move({ from: from, to: to, promotion: 'q' }); // Auto promote to queen
+    // Castling UX Fix: Check if user clicked King then Rook directly
+    let moveAttempt = { from: from, to: to, promotion: 'q' };
+
+    // Check if this is a King -> Rook interaction (common user error/preference)
+    const piece = game.get(from);
+    const targetPiece = game.get(to);
+
+    if (piece && piece.type === 'k' && targetPiece && targetPiece.type === 'r' && piece.color === targetPiece.color) {
+        // User clicked King then Rook. Translate to standard Castling Target Square.
+        // White: e1->h1 (O-O) => g1, e1->a1 (O-O-O) => c1
+        if (piece.color === 'w') {
+            if (to === 'h1') moveAttempt.to = 'g1';
+            if (to === 'a1') moveAttempt.to = 'c1';
+        } else {
+            if (to === 'h8') moveAttempt.to = 'g8';
+            if (to === 'a8') moveAttempt.to = 'c8';
+        }
+    }
+
+    const move = game.move(moveAttempt);
+
     if (move) {
         playSound(move);
         completeMove(move);
@@ -273,8 +302,21 @@ function tryMakeMove(from, to) {
             conn.send({ type: 'move', move: move });
         }
     } else {
+        // Invalid move
         clearHighlights();
         STATE.selectedSquare = null;
+        // If they clicked another friendly piece (that wasn't a castle rook), select it?
+        // Note: Logic in onSquareClick handles re-selection if clicking own piece, 
+        // but here we are in 'else' (tryMakeMove called). 
+        // If tryMakeMove fails, maybe we should have just selected that piece?
+        // onSquareClick (line 253) checks 'piece.color === turn'. 
+        // If tryMakeMove was called, it means we clicked a square that might be empty or opponent or...
+        // Actually, if we clicked our OWN piece, onSquareClick (253) handles it BEFORE calling tryMakeMove.
+        // So tryMakeMove is only called for Empty or Opponent squares (or invalid clicks).
+        // Wait, if I click King (selected) then click Rook (own piece), onSquareClick (253) sees it matches turn color.
+        // So it RE-SELECTS the Rook. It does NOT call tryMakeMove.
+        // THIS IS THE PROBLEM! 
+        // The Castling Logic (King->Rook) requires onSquareClick to NOT just select the rook.
     }
 }
 
@@ -373,10 +415,10 @@ function minimax(depth, alpha, beta, isMax) {
         let maxEval = -Infinity;
         for (const m of moves) {
             game.move(m);
-            const eval = minimax(depth - 1, alpha, beta, false);
+            const score = minimax(depth - 1, alpha, beta, false);
             game.undo();
-            maxEval = Math.max(maxEval, eval);
-            alpha = Math.max(alpha, eval);
+            maxEval = Math.max(maxEval, score);
+            alpha = Math.max(alpha, score);
             if (beta <= alpha) break;
         }
         return maxEval;
@@ -384,10 +426,10 @@ function minimax(depth, alpha, beta, isMax) {
         let minEval = Infinity;
         for (const m of moves) {
             game.move(m);
-            const eval = minimax(depth - 1, alpha, beta, true);
+            const score = minimax(depth - 1, alpha, beta, true);
             game.undo();
-            minEval = Math.min(minEval, eval);
-            beta = Math.min(beta, eval);
+            minEval = Math.min(minEval, score);
+            beta = Math.min(beta, score);
             if (beta <= alpha) break;
         }
         return minEval;
