@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="tr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Satranç by Kaan</title>
+    <!-- FontAwesome için -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
+    <!-- Stil Dosyası -->
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="background-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+    </div>
+
+    <!-- SABİT AYARLAR BUTONU -->
+    <button id="fixed-settings-btn" class="settings-trigger">
+        <i class="fa-solid fa-gear"></i>
+    </button>
+
+    <!-- EKRAN 1: GİRİŞ EKRANI -->
+    <div id="screen-intro" class="screen active-screen">
+        <div class="glass-panel text-center">
+            <h1 class="main-title"><i class="fa-solid fa-chess"></i> Modern Satranç</h1>
+            <p class="subtitle">Strateji ve Zeka Oyunu</p>
+            <div class="intro-buttons">
+                <!-- Sadece Oyuna Başla butonu kaldı, Ayarlar sağ üste taşındı -->
+                <button id="btn-enter" class="action-btn glow-effect large-btn">Oyuna Başla</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EKRAN 2: MOD SEÇİMİ -->
+    <div id="screen-mode" class="screen hidden">
+        <div class="glass-panel text-center">
+            <h2>Oyun Modu Seçin</h2>
+            <div class="mode-options">
+                <div class="mode-card" id="btn-mode-ai">
+                    <i class="fa-solid fa-robot"></i>
+                    <h3>Tek Kişilik</h3>
+                    <p>Yapay Zekaya Karşı</p>
+                </div>
+                <div class="mode-card" id="btn-mode-pvp">
+                    <i class="fa-solid fa-user-group"></i>
+                    <h3>İki Kişilik</h3>
+                    <p>Arkadaşınla Oyna</p>
+                </div>
+                <div class="mode-card" id="btn-mode-online">
+                    <i class="fa-solid fa-globe"></i>
+                    <h3>Online</h3>
+                    <p>Uzaktan Oyna</p>
+                </div>
+            </div>
+
+            <!-- Zorluk Seçimi (Sadece AI modu için görünür olacak) -->
+            <div id="difficulty-area" class="hidden">
+                <h3>Zorluk Seviyesi</h3>
+                <div class="difficulty-options">
+                    <label class="diff-card">
+                        <input type="radio" name="difficulty" value="easy" checked>
+                        <div class="diff-content">
+                            <i class="fa-solid fa-seedling icon-easy"></i>
+                            <span class="diff-title">Çaylak</span>
+                            <span class="diff-desc">Yeni başlayanlar</span>
+                        </div>
+                    </label>
+
+                    <label class="diff-card">
+                        <input type="radio" name="difficulty" value="medium">
+                        <div class="diff-content">
+                            <i class="fa-solid fa-chess-knight icon-medium"></i>
+                            <span class="diff-title">Usta</span>
+                            <span class="diff-desc">Dengeli rakip</span>
+                        </div>
+                    </label>
+
+                    <label class="diff-card">
+                        <input type="radio" name="difficulty" value="hard">
+                        <div class="diff-content">
+                            <i class="fa-solid fa-dragon icon-hard"></i>
+                            <span class="diff-title">Efsane</span>
+                            <span class="diff-desc">Gerçek meydan okuma</span>
+                        </div>
+                    </label>
+                </div>
+            </div>
+
+            <!-- ZAMAN AYARLARI (Her iki mod için de görünür) -->
+            <div id="time-settings-area" class="mt-20">
+                <h3>Zaman Ayarları</h3>
+                <div class="time-options">
+                    <label class="time-radio">
+                        <input type="radio" name="timeControl" value="unlimited" checked>
+                        <span>Sınırsız</span>
+                    </label>
+                    <label class="time-radio">
+                        <input type="radio" name="timeControl" value="limited">
+                        <span>Süreli</span>
+                    </label>
+                </div>
+
+                <div id="time-input-container" class="hidden mt-10">
+                    <label for="time-minutes"
+                        style="color: var(--text-muted); font-size: 0.9rem; margin-right: 10px;">Kişi Başı Süre
+                        (Dk):</label>
+                    <input type="number" id="time-minutes" value="10" min="1" max="180" class="time-input">
+                </div>
+            </div>
+
+            <!-- Start Button for AI Mode -->
+            <button id="btn-start-game" class="action-btn glow-effect large-btn mt-20">Oyunu Başlat</button>
+
+            <!-- Back Button (Outside to be visible in PvP too) -->
+            <div class="footer-actions mt-20">
+                <button id="btn-back-mode" class="action-btn secondary">Geri</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- EKRAN: AYARLAR -->
+    <div id="screen-settings" class="screen hidden">
+        <div class="glass-panel text-center settings-panel">
+            <h2>Oyun Ayarları</h2>
+
+            <div class="setting-group">
+                <h3>Tahta Teması</h3>
+                <div class="theme-options">
+                    <div class="theme-btn active-theme" data-theme="classic" style="background:#555;">Klasik</div>
+                    <div class="theme-btn" data-theme="ocean" style="background:#3b82f6;">Okyanus</div>
+                    <div class="theme-btn" data-theme="emerald" style="background:#10b981;">Zümrüt</div>
+                    <div class="theme-btn" data-theme="purple" style="background:#8b5cf6;">Neon</div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Taş Stili</h3>
+                <div class="piece-options">
+                    <div class="piece-btn active-piece" data-piece="default">
+                        <i class="fa-solid fa-chess-knight" style="color: #f8fafc;"></i>
+                    </div>
+                    <div class="piece-btn" data-piece="gold">
+                        <i class="fa-solid fa-chess-knight" style="color: #fbbf24;"></i>
+                    </div>
+                    <div class="piece-btn" data-piece="neon">
+                        <i class="fa-solid fa-chess-knight" style="color: #00f2ff;"></i>
+                    </div>
+                    <div class="piece-btn" data-piece="nature">
+                        <i class="fa-solid fa-chess-knight" style="color: #a8a29e;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Ses Efektleri</h3>
+                <div class="toggle-switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="sound-toggle" checked>
+                        <span class="slider round"></span>
+                    </label>
+                    <span id="sound-status-text">Açık</span>
+                </div>
+            </div>
+
+            <div class="setting-group">
+                <h3>Görünüm Modu</h3>
+                <div class="toggle-switch-container">
+                    <label class="switch">
+                        <input type="checkbox" id="view-3d-toggle">
+                        <span class="slider round"></span>
+                    </label>
+                    <span id="view-3d-status-text">2D</span>
+                </div>
+            </div>
+
+            <button id="btn-settings-close" class="action-btn primary mt-20">Kapat</button>
+        </div>
+    </div>
+
+    <!-- EKRAN: OYUN SONU -->
+    <div id="screen-gameover" class="screen hidden">
+        <div class="glass-panel text-center">
+            <h2 id="winner-title" class="main-title">KAZANAN</h2>
+            <p id="winner-name" style="font-size: 2rem; margin-bottom: 20px; color: var(--primary-color);">Beyaz</p>
+
+            <div class="game-actions" style="flex-direction: column;">
+                <button id="btn-play-again" class="action-btn glow-effect large-btn">Tekrar Oyna</button>
+                <button id="btn-gameover-home" class="action-btn secondary large-btn">Ana Menü</button>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- EKRAN 3: OYUN EKRANI -->
+    <div id="screen-game" class="screen hidden">
+        <div class="game-layout">
+            <!-- Sol Panel: Tahta -->
+            <div class="board-container">
+                <div id="board" class="chess-board">
+                    <!-- Kareler JS ile oluşturulacak -->
+                </div>
+            </div>
+
+            <!-- Sağ Panel: Bilgi ve Kontroller -->
+            <div class="side-panel glass-panel">
+                <div class="game-info">
+                    <div class="player-turn active-turn" id="turn-display">
+                        <span id="turn-icon"><i class="fa-solid fa-chess-pawn"></i></span>
+                        <span id="turn-text">Sıra: Beyaz</span>
+                    </div>
+                    <div class="status-msg" id="status">İyi eğlenceler!</div>
+                </div>
+
+                <div class="timers hidden" id="timers-container">
+                    <div class="timer-box" id="timer-white">
+                        <i class="fa-solid fa-hourglass-start"></i>
+                        <span>Beyaz: <span id="time-w">--:--</span></span>
+                    </div>
+                    <div class="timer-box" id="timer-black">
+                        <i class="fa-solid fa-hourglass-start"></i>
+                        <span>Siyah: <span id="time-b">--:--</span></span>
+                    </div>
+                </div>
+
+                <div class="move-history">
+                    <h3>Hamleler</h3>
+                    <ul id="historyList"></ul>
+                </div>
+
+                <div class="game-controls">
+                    <button id="undoBtn" class="action-btn secondary"><i class="fa-solid fa-rotate-left"></i> Geri
+                        Al</button>
+                    <button id="resetBtn" class="action-btn danger"><i class="fa-solid fa-power-off"></i> Pes Et /
+                        Sıfırla</button>
+                    <button id="homeBtn" class="action-btn primary"><i class="fa-solid fa-house"></i> Ana Menü</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Terfi Modalı -->
+    <div id="promotion-modal" class="modal hidden">
+        <div class="modal-content glass-panel">
+            <h3>Terfi Et</h3>
+            <div class="promotion-pieces">
+                <span data-piece="q" class="promo-piece"><i class="fa-solid fa-chess-queen"></i></span>
+                <span data-piece="r" class="promo-piece"><i class="fa-solid fa-chess-rook"></i></span>
+                <span data-piece="b" class="promo-piece"><i class="fa-solid fa-chess-bishop"></i></span>
+                <span data-piece="n" class="promo-piece"><i class="fa-solid fa-chess-knight"></i></span>
+            </div>
+        </div>
+    </div>
+
+    <!-- EKRAN: ONLINE LOBBY -->
+    <div id="screen-online" class="screen hidden">
+        <div class="glass-panel text-center" style="max-width: 500px;">
+            <h2><i class="fa-solid fa-globe"></i> Online Oda</h2>
+            <p class="subtitle">Arkadaşınla uzaktan oyna</p>
+
+            <div id="lobby-initial" class="lobby-section">
+                <button id="btn-create-room" class="action-btn glow-effect large-btn"
+                    style="width: 100%; margin-bottom: 15px;">
+                    <i class="fa-solid fa-plus"></i> Oda Oluştur (Beyaz)
+                </button>
+
+                <div class="divider"
+                    style="margin: 20px 0; border-top: 1px solid rgba(255,255,255,0.1); position: relative;">
+                    <span
+                        style="position: absolute; top: -12px; left: 50%; transform: translateX(-50%); background: var(--glass-bg); padding: 0 10px; font-size: 0.8rem; color: var(--text-muted);">VEYA</span>
+                </div>
+
+                <div class="join-area" style="display: flex; gap: 10px; margin-top: 25px;">
+                    <input type="text" id="remote-id-input" placeholder="Oda Kodunu Gir" class="time-input"
+                        style="width: 100%; text-align: left;">
+                    <button id="btn-join-room" class="action-btn primary" style="white-space: nowrap;">Katıl
+                        (Siyah)</button>
+                </div>
+            </div>
+
+            <div id="lobby-host" class="lobby-section hidden">
+                <div class="loader-spinner" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 20px;">
+                    <i class="fa-solid fa-circle-notch fa-spin"></i>
+                </div>
+                <p>Oda Kodun:</p>
+                <div class="code-box"
+                    style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin: 10px 0; font-family: monospace; font-size: 1.5rem; letter-spacing: 2px; border: 2px dashed var(--primary-color);">
+                    <span id="my-peer-id">Yükleniyor...</span>
+                    <button id="btn-copy-code"
+                        style="background: none; border: none; color: white; cursor: pointer; margin-left: 10px;"><i
+                            class="fa-regular fa-copy"></i></button>
+                </div>
+                <p class="status-msg">Rakip bekleniyor...</p>
+                <button id="btn-cancel-host" class="action-btn secondary mt-20">İptal</button>
+            </div>
+
+            <button id="btn-back-online" class="action-btn secondary mt-20" style="margin-top: 30px;">Geri Dön</button>
+        </div>
+    </div>
+
+    <!-- NOTIFICATION TOAST -->
+    <div id="notification-toast" class="notification-toast hidden">
+        <div class="glass-panel" style="padding: 15px 25px; display: flex; align-items: center; gap: 15px;">
+            <i class="fa-solid fa-bell" style="color: var(--primary-color); font-size: 1.2rem;"></i>
+            <span id="notification-msg">Rakip tekrar oynamak istiyor!</span>
+            <button id="btn-accept-rematch" class="action-btn small-btn primary">Kabul Et</button>
+            <button id="btn-close-notification" class="action-btn small-btn secondary"
+                style="min-width: 30px; padding: 5px 10px;"><i class="fa-solid fa-xmark"></i></button>
+        </div>
+    </div>
+
+    <!-- PeerJS Library -->
+    <script src="https://unpkg.com/peerjs@1.5.2/dist/peerjs.min.js"></script>
+    <!-- Chess Code Logic Libraries -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <script src="script.js"></script>
+</body>
+
+</html>
