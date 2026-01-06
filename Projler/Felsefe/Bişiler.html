@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VstormX 2.4 ⚡</title>
+<style>
+:root {
+  --bg-color: #f5f5f5;
+  --text-color: #222;
+  --card-bg: #fff;
+  --button-bg: #333;
+  --button-text: #fff;
+  --accent-color: #4f46e5;
+}
+
+body.dark {
+  --bg-color: #121212;
+  --text-color: #f1f1f1;
+  --card-bg: #1e1e1e;
+  --button-bg: #f1f1f1;
+  --button-text: #121212;
+}
+
+body {
+  margin:0;
+  font-family: 'Segoe UI', sans-serif;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+  transition: background 0.3s, color 0.3s;
+}
+
+header {
+  text-align:center;
+  padding:15px 0;
+  background: var(--card-bg);
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+}
+
+h1 { margin:0; font-size:1.5rem; letter-spacing:1px; }
+
+#clock {
+  font-size:3rem;
+  text-align:center;
+  margin:60px 0 20px 0;
+  font-weight:600;
+}
+
+#home {
+  display:flex;
+  flex-direction: column;
+  align-items:center;
+  justify-content:flex-start;
+  min-height: 100vh;
+  padding: 20px;
+  gap: 30px;
+}
+
+.menu {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px,1fr));
+  gap:20px;
+  width:100%;
+  max-width:800px;
+}
+
+.card {
+  background: var(--card-bg);
+  padding:25px;
+  border-radius:14px;
+  box-shadow:0 3px 8px rgba(0,0,0,0.1);
+  text-align:center;
+  font-size:1.2rem;
+  cursor:pointer;
+  transition: transform 0.2s;
+}
+
+.card:hover { transform: scale(1.05); }
+
+/* Notlar Sayfası */
+#notes-page { display:none; padding:20px; }
+#notes-container {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px,1fr));
+  gap:12px;
+  margin-top:20px;
+}
+
+.note {
+  background: var(--card-bg);
+  border-radius:12px;
+  box-shadow:0 2px 6px rgba(0,0,0,0.1);
+  padding:15px;
+  position:relative;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.delete-btn {
+  position:absolute;
+  bottom:10px;
+  right:10px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border:none;
+  border-radius:6px;
+  padding:4px 8px;
+  cursor:pointer;
+  font-size:0.8rem;
+}
+
+#add-note-btn {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: var(--button-bg);
+  color: var(--button-text);
+  border:none;
+  border-radius:50%;
+  width:55px;
+  height:55px;
+  font-size:1.5rem;
+  cursor:pointer;
+  box-shadow:0 2px 8px rgba(0,0,0,0.3);
+}
+
+#note-input-panel {
+  position: fixed;
+  bottom: -300px;
+  left:0;
+  width:100%;
+  background: var(--card-bg);
+  box-shadow:0 -2px 10px rgba(0,0,0,0.2);
+  padding:20px;
+  border-radius:20px 20px 0 0;
+  transition: bottom 0.4s;
+}
+#note-input-panel.active { bottom:0; }
+textarea {
+  width:100%; height:120px; padding:10px; border-radius:10px;
+  border:1px solid #ccc; resize:none; background: var(--bg-color); color: var(--text-color);
+  font-size:1rem;
+}
+#save-note {
+  margin-top:10px; width:100%; padding:10px; border:none; background: var(--button-bg);
+  color: var(--button-text); border-radius:10px; cursor:pointer; font-size:1rem; font-weight:500;
+}
+#back-home { background: var(--button-bg); color: var(--button-text); border:none; border-radius:8px; padding:10px 20px; cursor:pointer; margin-top:10px; }
+
+/* Stylish Settings */
+#settings-page {
+  display:none; position:relative; padding:20px;
+}
+#settings-panel {
+  position:absolute;
+  top:50%;
+  left:50%;
+  transform: translate(-50%, -50%);
+  background: rgba(255,255,255,0.95);
+  border-radius: 25px;
+  padding:40px;
+  width:90%;
+  max-width:170px;
+  max-height:90%;
+  overflow-y:auto;
+  box-shadow:0 8px 25px rgba(0,0,0,0.3);
+  text-align:center;
+}
+body.dark #settings-panel { background: rgba(30,30,30,0.95); }
+
+.setting { margin:20px 0; }
+
+/* Toggle Buttons */
+.toggle-group { display:flex; justify-content:center; gap:15px; margin-top:10px; flex-wrap: wrap;}
+.toggle-group button {
+  padding:10px 25px;
+  border-radius:25px;
+  border:1px solid var(--accent-color);
+  background: var(--card-bg);
+  color: var(--text-color);
+  cursor:pointer;
+  font-weight:600;
+  transition:0.2s;
+}
+.toggle-group button.active {
+  background: var(--accent-color);
+  color: #fff;
+}
+</style>
+</head>
+<body>
+<header>
+  <h1>⚡ VstormX 2.4</h1>
+</header>
+
+<section id="home">
+  <div id="clock">--:--:--</div>
+  <div class="menu">
+    <div class="card" id="open-notes">📝 Notlar</div>
+    <div class="card" id="open-bots">🤖 Botlar</div>
+    <div class="card" id="open-settings">⚙️ Ayarlar</div>
+    <div class="card">📖 Hakkında</div>
+  </div>
+</section>
+
+<section id="notes-page">
+  <button id="back-home">⬅️ Anasayfa</button>
+  <h2>Notlarım</h2>
+  <div id="notes-container"></div>
+  <button id="add-note-btn">＋</button>
+  <div id="note-input-panel">
+    <textarea id="note-text" placeholder="Yeni notunu yaz..."></textarea>
+    <button id="save-note">Notu Ekle</button>
+  </div>
+</section>
+
+<section id="settings-page">
+  <button id="back-home-settings">⬅️ Anasayfa</button>
+  <div id="settings-panel">
+    <h2>Ayarlar</h2>
+    <!-- Tema -->
+    <div class="setting">
+      <label>Tema:</label>
+      <div class="toggle-group" id="theme-toggle">
+        <button data-theme="light">Aydınlık</button>
+        <button data-theme="dark">Karanlık</button>
+      </div>
+    </div>
+    <!-- Dil -->
+    <div class="setting">
+      <label>Dil / Language:</label>
+      <div class="toggle-group" id="lang-toggle">
+        <button data-lang="tr">TR</button>
+        <button data-lang="en">EN</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+// Saat
+function updateClock(){
+  const now=new Date();
+  const h=String(now.getHours()).padStart(2,"0");
+  const m=String(now.getMinutes()).padStart(2,"0");
+  const s=String(now.getSeconds()).padStart(2,"0");
+  document.getElementById("clock").textContent=`${h}:${m}:${s}`;
+}
+setInterval(updateClock,1000);
+updateClock();
+
+// Tema & Dil
+const savedTheme=localStorage.getItem("theme")||"light";
+const savedLang=localStorage.getItem("lang")||"tr";
+if(savedTheme==="dark") document.body.classList.add("dark");
+
+// Sayfa geçiş
+const home=document.getElementById("home");
+const notesPage=document.getElementById("notes-page");
+const settingsPage=document.getElementById("settings-page");
+document.getElementById("open-notes").onclick=()=>{ home.style.display="none"; notesPage.style.display="block"; settingsPage.style.display="none"; };
+document.getElementById("open-settings").onclick=()=>{ home.style.display="none"; notesPage.style.display="none"; settingsPage.style.display="block"; };
+document.getElementById("back-home").onclick=()=>{ notesPage.style.display="none"; settingsPage.style.display="none"; home.style.display="flex"; };
+document.getElementById("back-home-settings").onclick=()=>{ notesPage.style.display="none"; settingsPage.style.display="none"; home.style.display="flex"; };
+
+// Toggle Buttons - Tema
+const themeButtons = document.querySelectorAll("#theme-toggle button");
+themeButtons.forEach(btn=>{
+  if(btn.dataset.theme===savedTheme) btn.classList.add("active");
+  btn.onclick=()=>{
+    themeButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    document.body.classList.toggle("dark", btn.dataset.theme==="dark");
+    localStorage.setItem("theme", btn.dataset.theme);
+  }
+});
+
+// Toggle Buttons - Dil
+const langButtons = document.querySelectorAll("#lang-toggle button");
+langButtons.forEach(btn=>{
+  if(btn.dataset.lang===savedLang) btn.classList.add("active");
+  btn.onclick=()=>{
+    langButtons.forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    localStorage.setItem("lang", btn.dataset.lang);
+    location.reload();
+  }
+});
+
+// Notlar Sistemi
+const addNoteBtn=document.getElementById("add-note-btn");
+const notePanel=document.getElementById("note-input-panel");
+const saveNoteBtn=document.getElementById("save-note");
+const noteText=document.getElementById("note-text");
+const notesContainer=document.getElementById("notes-container");
+const savedNotes=JSON.parse(localStorage.getItem("notes")||"[]");
+savedNotes.forEach(createNote);
+addNoteBtn.onclick=()=>notePanel.classList.toggle("active");
+saveNoteBtn.onclick=()=>{
+  const text=noteText.value.trim();
+  if(text==="") return;
+  createNote(text);
+  savedNotes.push(text);
+  localStorage.setItem("notes",JSON.stringify(savedNotes));
+  noteText.value="";
+  notePanel.classList.remove("active");
+}
+function createNote(text){
+  const note=document.createElement("div");
+  note.className="note"; note.textContent=text;
+  const delBtn=document.createElement("button");
+  delBtn.textContent="Sil"; delBtn.className="delete-btn";
+  delBtn.onclick=()=>{
+    notesContainer.removeChild(note);
+    const idx=savedNotes.indexOf(text);
+    if(idx>-1){ savedNotes.splice(idx,1); localStorage.setItem("notes",JSON.stringify(savedNotes)); }
+  };
+  note.appendChild(delBtn);
+  notesContainer.appendChild(note);
+}
+</script>
+</body>
+</html>

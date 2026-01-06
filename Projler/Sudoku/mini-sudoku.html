@@ -1,0 +1,222 @@
+<!doctype html>
+<html lang="tr">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Sudoku — Not Modlu Sürüm</title>
+<style>
+:root{
+  --bg:#071022;
+  --card:#0b1220;
+  --muted:#9aa8bf;
+  --accent:#60a5fa;
+  --ok:#16a34a;
+  --bad:#ef4444;
+  --cell:#0f1724;
+  --preset:#0f2436;
+  --size:calc(min(86vmin,760px));
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:linear-gradient(180deg,#041026,#071428);
+  color:#e6eef8;
+  font-family:Inter,system-ui;
+  -webkit-font-smoothing:antialiased;
+}
+.wrap{
+  width:var(--size);
+  background:linear-gradient(180deg,var(--card),#071428);
+  border-radius:12px;
+  padding:18px;
+  box-shadow:0 10px 40px rgba(2,6,23,.6);
+}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px}
+h1{font-size:18px;margin:0}
+.controls{display:flex;gap:8px;align-items:center}
+button{
+  background:transparent;border:1px solid rgba(255,255,255,.06);color:var(--muted);
+  padding:8px 10px;border-radius:8px;cursor:pointer;font-weight:600;
+}
+button:hover{border-color:rgba(255,255,255,.12)}
+select{
+  border-radius:6px;padding:6px;color:#e6eef8;background:#0f1724;border:1px solid rgba(255,255,255,.06);
+  cursor:pointer;
+}
+.grid-wrap{display:grid;grid-template-columns:1fr 240px;gap:14px;margin-top:12px}
+.board{
+  width:100%;aspect-ratio:1;
+  background:linear-gradient(180deg,#071428,#061827);
+  padding:10px;border-radius:10px;
+  display:grid;grid-template-columns:repeat(9,1fr);grid-template-rows:repeat(9,1fr);gap:4px;
+}
+.cell{
+  background:var(--cell);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  font-weight:600;
+  color:#e6eef8;
+  user-select:none;
+  cursor:pointer;
+  position:relative;
+  transition:all .12s ease;
+  border-radius:6px;
+}
+.cell.preset{background:var(--preset);cursor:default;color:#bfe1ff}
+.cell.selected{outline:3px solid rgba(96,165,250,.18);box-shadow:0 4px 16px rgba(3,7,18,.5)}
+.cell.correct{background:var(--ok)!important;color:#eaffef}
+.cell.wrong{background:var(--bad)!important;color:#fff2f2}
+.cell.empty{color:rgba(255,255,255,.45)}
+.note{
+  position:absolute;
+  top:2px;left:2px;right:2px;bottom:2px;
+  font-size:10px;
+  color:#9aa8bf;
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  grid-template-rows:repeat(3,1fr);
+  text-align:center;
+  align-items:center;
+  justify-items:center;
+  pointer-events:none;
+}
+
+/* --- 3x3 blok sınırlarını belirginleştirir --- */
+.board .cell { border: 1px solid rgba(255,255,255,0.05); }
+.board .cell:nth-child(3n) { border-right: 2px solid rgba(255,255,255,0.3); }
+.board .cell:nth-child(9n+1) { border-left: 2px solid rgba(255,255,255,0.3); }
+.board .cell:nth-child(n+19):nth-child(-n+27),
+.board .cell:nth-child(n+46):nth-child(-n+54),
+.board .cell:nth-child(n+73):nth-child(-n+81) { border-bottom: 2px solid rgba(255,255,255,0.3); }
+.board .cell:nth-child(-n+9) { border-top: 2px solid rgba(255,255,255,0.3); }
+
+aside.panel{
+  background:linear-gradient(180deg,#071226,#07182a);
+  border-radius:8px;padding:12px;display:flex;flex-direction:column;gap:12px;
+  min-height:380px;
+}
+.pad{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.pad button{
+  width:48px;height:44px;border-radius:8px;border:0;background:linear-gradient(180deg,#1f2937,#111827);
+  color:#e6eef8;font-weight:700;font-size:16px;cursor:pointer;
+}
+.pad button:hover{transform:translateY(-2px)}
+.meta{color:var(--muted);font-size:13px;display:flex;flex-direction:column;gap:6px}
+.smallctrls{display:flex;gap:8px;flex-wrap:wrap}
+.big{background:var(--accent);color:#04202f;border:0;padding:10px 14px;border-radius:8px;font-weight:800;cursor:pointer}
+.checkBtn{background:linear-gradient(180deg,#10b981,#059669);color:white;border:0;padding:10px 12px;border-radius:8px;font-weight:800;cursor:pointer}
+footer{color:var(--muted);font-size:13px;text-align:center;margin-top:12px}
+@media (max-width:960px){
+  .grid-wrap{grid-template-columns:1fr;align-items:start}
+  aside.panel{min-height:180px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <h1>Sudoku — Not Modlu Sürüm</h1>
+  <div class="controls">
+    <button id="newBtn" class="big">Yeni Oyun</button>
+    <select id="difficulty">
+      <option value="easy">Kolay</option>
+      <option value="medium" selected>Orta</option>
+      <option value="hard">Zor</option>
+    </select>
+    <button id="noteBtn">Not Modu: Kapalı</button>
+    <button id="resetBtn">Temizle</button>
+    <button id="checkBtn" class="checkBtn">Kontrol Et</button>
+  </div>
+</header>
+<main class="grid-wrap">
+  <div class="board" id="board"></div>
+  <aside class="panel">
+    <div class="meta">
+      <div>İstediğin kareye tıkla ve numaranı gir.</div>
+      <div>Not Modu açıkken muhtemel sayıları ekleyebilirsin.</div>
+    </div>
+    <div class="pad" id="pad"></div>
+    <div class="smallctrls">
+      <button id="hintBtn">İpucu (1)</button>
+      <button id="solveBtn">Tamamını Çöz</button>
+    </div>
+  </aside>
+</main>
+<footer>Yapımcı: Kaan Demir</footer>
+</div>
+
+<script>
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function emptyBoard(){return Array.from({length:9},()=>Array(9).fill(0));}
+function copyBoard(b){return b.map(r=>r.slice());}
+function isSafe(b,r,c,v){for(let i=0;i<9;i++){if(b[r][i]===v||b[i][c]===v)return false;}
+let sr=Math.floor(r/3)*3,sc=Math.floor(c/3)*3;
+for(let i=sr;i<sr+3;i++)for(let j=sc;j<sc+3;j++)if(b[i][j]===v)return false;
+return true;}
+function solveCount(b,limit=2){let count=0;const clone=copyBoard(b);
+function findEmpty(){for(let i=0;i<9;i++)for(let j=0;j<9;j++)if(clone[i][j]===0)return[i,j];return null;}
+function backtrack(){if(count>=limit)return;const pos=findEmpty();if(!pos){count++;return;}
+const[r,c]=pos;for(let v=1;v<=9;v++){if(isSafe(clone,r,c,v)){clone[r][c]=v;backtrack();clone[r][c]=0;if(count>=limit)return;}}}
+backtrack();return count;}
+function generateFullSolution(){const b=emptyBoard();
+function backtrack(pos=0){if(pos===81)return true;
+const r=Math.floor(pos/9),c=pos%9,nums=shuffle([1,2,3,4,5,6,7,8,9]);
+for(const v of nums){if(isSafe(b,r,c,v)){b[r][c]=v;if(backtrack(pos+1))return true;b[r][c]=0;}}
+return false;}backtrack();return b;}
+function generatePuzzle(diff='medium'){const level={easy:40,medium:50,hard:56},remove=level[diff]||50;
+const sol=generateFullSolution(),puz=copyBoard(sol);const cells=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)cells.push([r,c]);
+shuffle(cells);let rem=0;for(const[r,c]of cells){if(rem>=remove)break;const back=puz[r][c];puz[r][c]=0;if(solveCount(puz,2)!==1)puz[r][c]=back;else rem++;}return{puzzle:puz,solution:sol};}
+
+const boardEl=document.getElementById('board'),padEl=document.getElementById('pad');
+const newBtn=document.getElementById('newBtn'),checkBtn=document.getElementById('checkBtn'),resetBtn=document.getElementById('resetBtn'),hintBtn=document.getElementById('hintBtn'),solveBtn=document.getElementById('solveBtn'),noteBtn=document.getElementById('noteBtn');
+let currentPuzzle=null,currentSolution=null,presetMask=Array.from({length:9},()=>Array(9).fill(false)),selected=null,hintsLeft=1,noteMode=false,notes=Array.from({length:9},()=>Array(9).fill(null));
+
+function buildBoardDOM(){boardEl.innerHTML='';for(let r=0;r<9;r++)for(let c=0;c<9;c++){const cell=document.createElement('div');cell.className='cell';cell.dataset.r=r;cell.dataset.c=c;cell.tabIndex=0;
+const noteDiv=document.createElement('div');noteDiv.className='note';cell.appendChild(noteDiv);
+cell.addEventListener('click',()=>onCellClick(r,c,cell));boardEl.appendChild(cell);}}
+
+function renderPuzzle(puz){const cells=boardEl.children;
+for(let r=0;r<9;r++)for(let c=0;c<9;c++){const idx=r*9+c,el=cells[idx],val=puz[r][c];
+el.classList.remove('preset','selected','correct','wrong','empty');
+if(val===0){el.firstChild.textContent='';el.classList.add('empty');}else{el.textContent=val;el.classList.remove('empty');}
+if(presetMask[r][c])el.classList.add('preset');}}
+
+function onCellClick(r,c,el){document.querySelectorAll('.cell').forEach(x=>x.classList.remove('selected'));
+el.classList.add('selected');selected={r,c,el};showPad();}
+
+function showPad(){padEl.innerHTML='';for(let i=1;i<=9;i++){const b=document.createElement('button');b.textContent=i;b.onclick=()=>{if(!selected)return;const{r,c,el}=selected;if(presetMask[r][c])return;
+if(noteMode){if(!notes[r][c])notes[r][c]=new Set();if(notes[r][c].has(i))notes[r][c].delete(i);else notes[r][c].add(i);updateNotes(r,c,el);}
+else{currentPuzzle[r][c]=i;el.textContent=i;el.classList.remove('empty','wrong','correct');notes[r][c]=null;el.querySelector('.note').innerHTML='';}
+selected=null;padEl.innerHTML='';};padEl.appendChild(b);}
+const del=document.createElement('button');del.textContent='Sil';del.onclick=()=>{if(!selected)return;const{r,c,el}=selected;if(presetMask[r][c])return;currentPuzzle[r][c]=0;notes[r][c]=null;el.textContent='';el.querySelector('.note').innerHTML='';el.classList.add('empty');selected=null;padEl.innerHTML='';};padEl.appendChild(del);}
+
+function updateNotes(r,c,el){const n=notes[r][c];const div=el.querySelector('.note');div.innerHTML='';if(!n)return;for(let i=1;i<=9;i++){const span=document.createElement('div');span.textContent=n.has(i)?i:'';div.appendChild(span);}}
+
+function checkPuzzle(){document.querySelectorAll('.cell').forEach(x=>x.classList.remove('correct','wrong'));
+for(let r=0;r<9;r++)for(let c=0;c<9;c++){const v=currentPuzzle[r][c],idx=r*9+c,el=boardEl.children[idx];if(v===0)continue;if(v===currentSolution[r][c])el.classList.add('correct');else el.classList.add('wrong');}}
+
+function giveHint(){if(hintsLeft<=0)return alert('İpucu kalmadı.');
+const empty=[];for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!presetMask[r][c]&&currentPuzzle[r][c]===0)empty.push([r,c]);
+if(!empty.length)return alert('İpucu yok (tahta dolu).');
+const[r,c]=empty[Math.floor(Math.random()*empty.length)];
+currentPuzzle[r][c]=currentSolution[r][c];
+const el=boardEl.children[r*9+c];el.textContent=currentSolution[r][c];el.classList.remove('empty');el.classList.add('correct');hintsLeft--;hintBtn.textContent=`İpucu (${hintsLeft})`; }
+
+function solveAll(){currentPuzzle=copyBoard(currentSolution);renderPuzzle(currentPuzzle);}
+function resetPuzzle(){for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(!presetMask[r][c]){currentPuzzle[r][c]=0;notes[r][c]=null;}renderPuzzle(currentPuzzle);}
+function newGame(){const diff=document.getElementById('difficulty').value;newBtn.textContent='Üretiliyor...';newBtn.disabled=true;
+setTimeout(()=>{const gen=generatePuzzle(diff);currentPuzzle=gen.puzzle;currentSolution=gen.solution;presetMask=Array.from({length:9},()=>Array(9).fill(false));
+for(let r=0;r<9;r++)for(let c=0;c<9;c++)if(currentPuzzle[r][c]!==0)presetMask[r][c]=true;
+buildBoardDOM();renderPuzzle(currentPuzzle);notes=Array.from({length:9},()=>Array(9).fill(null));hintsLeft=1;hintBtn.textContent='İpucu (1)';newBtn.textContent='Yeni Oyun';newBtn.disabled=false;},10);}
+noteBtn.onclick=()=>{noteMode=!noteMode;noteBtn.textContent=noteMode?'✏️ Not Modu: Açık':'✏️ Not Modu: Kapalı';};
+buildBoardDOM();newGame();
+newBtn.onclick=newGame;checkBtn.onclick=checkPuzzle;resetBtn.onclick=resetPuzzle;hintBtn.onclick=giveHint;solveBtn.onclick=()=>{if(confirm('Tümünü çözmek istiyor musun?'))solveAll();};
+</script>
+</body>
+</html>
